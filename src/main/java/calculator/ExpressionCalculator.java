@@ -34,7 +34,8 @@ public class ExpressionCalculator {
 				if (variables.get(expression) != null) {
 					return variables.get(expression);
 				}
-				return Integer.parseInt(expression);
+				//return Integer.parseInt(expression);
+				return Double.parseDouble(expression);
 			}
 
 			expressionList.add(expression.substring(0, startIndex).trim()); // First operator

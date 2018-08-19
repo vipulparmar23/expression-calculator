@@ -73,23 +73,25 @@ public class ExpressionCalculator {
 	public double calculate(ArrayList<String> expressions) {
 
 		double result = 0;
+		
+		String operator = expressions.get(0);
 
-		if ("mult".equals(expressions.get(0))) {
+		if (operator.equalsIgnoreCase("mult")) {
 			return breakTheExpression(expressions.get(1)) * breakTheExpression(expressions.get(2));
-		} else if ("add".equals(expressions.get(0))) {
+		} else if (operator.equalsIgnoreCase("add")) {
 			return breakTheExpression(expressions.get(1)) + breakTheExpression(expressions.get(2));
-		} else if ("sub".equals(expressions.get(0))) {
+		} else if (operator.equalsIgnoreCase("sub")) {
 			return breakTheExpression(expressions.get(1)) - breakTheExpression(expressions.get(2));
-		} else if ("div".equals(expressions.get(0))) {
+		} else if (operator.equalsIgnoreCase("div")) {
 			return breakTheExpression(expressions.get(1)) / breakTheExpression(expressions.get(2));
-		} else if ("let".equals(expressions.get(0))) {
-			String variableName = expressions.get(1);
-			Double value = variables.get(variableName);
-			variables.put(variableName, breakTheExpression(expressions.get(2)));
+		} else if (operator.equalsIgnoreCase("let")) { // if operator is let, the next two elements would be a variable and its value
+			String letVariable = expressions.get(1);
+			Double value = variables.get(letVariable);
+			variables.put(letVariable, breakTheExpression(expressions.get(2)));
 
 			result = breakTheExpression(expressions.get(3));
 
-			variables.put(variableName, value);
+			variables.put(letVariable, value);
 		}
 		return result;
 	}
@@ -133,6 +135,10 @@ public class ExpressionCalculator {
 			System.exit(0);
 		}else {
 			double result = cal.breakTheExpression(inputString);
+			if(result < Integer.MIN_VALUE || result > Integer.MAX_VALUE) {
+				System.out.println("Result is not between Integer.MIN_VALUE and Integer.MAX_VALUE");
+				System.exit(0);
+			}
 			System.out.println(result);
 		}
 		scan.close();

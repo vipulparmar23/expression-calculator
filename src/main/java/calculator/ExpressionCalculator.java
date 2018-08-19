@@ -15,9 +15,9 @@ public class ExpressionCalculator {
 	 * Using HashMap to store variable and their values set by 'let' command
 	 */
 
-	static HashMap<String, Double> variables = new HashMap<String, Double>();
+	static HashMap<String, Integer> variables = new HashMap<String, Integer>();
 
-	public double breakTheExpression(String expression) {
+	public int breakTheExpression(String expression) {
 		// Storing chunks of expression in ArrayList
 		
 		LOGGER.debug("Inside breakTheExpression() method");
@@ -43,7 +43,7 @@ public class ExpressionCalculator {
 					return variables.get(expression);
 				}
 				//return Integer.parseInt(expression);
-				return Double.parseDouble(expression);
+				return Integer.parseInt(expression);
 			}
 			LOGGER.debug("Adding sub-expression to ArrayList: "+expression.substring(0, startIndex).trim());
 			expressionList.add(expression.substring(0, startIndex).trim()); // First operator
@@ -76,13 +76,14 @@ public class ExpressionCalculator {
 			//e.printStackTrace();
 			LOGGER.error(e.getMessage(), e);
 		}
+		LOGGER.debug("Passing the expressionList to calculate() method");
 		return calculate(expressionList);
 	}
 
-	public double calculate(ArrayList<String> expressions) {
+	public int calculate(ArrayList<String> expressions) {
 
 		LOGGER.debug("Inside calculate() method");
-		double result = 0;
+		int result = 0;
 		
 		String operator = expressions.get(0);
 		LOGGER.debug("Operator: "+operator);
@@ -114,7 +115,7 @@ public class ExpressionCalculator {
 		} else if (operator.equalsIgnoreCase("let")) { // if operator is let, the next two elements would be a variable and its value
 			
 			String letVariable = expressions.get(1);
-			Double value = variables.get(letVariable);
+			Integer value = variables.get(letVariable);
 			variables.put(letVariable, breakTheExpression(expressions.get(2)));
 
 			result = breakTheExpression(expressions.get(3));
@@ -128,27 +129,34 @@ public class ExpressionCalculator {
 	public boolean checkFormat(String expression) {
 
 		int brackets = 0;
-		boolean check = false;
+		boolean checkResult = false;
+		int dots = 0;
+		
 		LOGGER.debug("Inside checkFormat() method");
 		if(expression.length() == 0) {
 			LOGGER.error("No expression provided");
-			return check;
+			return false;
 		}
-		LOGGER.debug("Checking for bracket descripansy");
+		LOGGER.debug("Checking for bracket descripansy and non-integer values");
 		for(int i = 0; i < expression.length(); i++) {
 			if(expression.charAt(i) == '(') {
 				brackets++;
 			}else if(expression.charAt(i) == ')'){
 				brackets--;
+			}else if(expression.charAt(i) == '.') {
+				dots++;
 			}
 		}
 		if(brackets > 0 || brackets < 0) {
 			LOGGER.error("Expression format is not proper. Check for missing or extra bracket");
-			check = false;
+			checkResult = false;
+		}else if (dots > 0){
+			LOGGER.error("Expression contains non-integer values");
+			checkResult = false;
 		}else {
-			check = true;
+			checkResult = true;
 		}
-		return check;
+		return checkResult;
 	}
 	
 	public static void main(String[] args) {
@@ -164,7 +172,7 @@ public class ExpressionCalculator {
 			//System.out.println("Expression format is not proper. Check for missing or extra bracket.");
 			System.exit(0);
 		}else {
-			double result = cal.breakTheExpression(inputString);
+			int result = cal.breakTheExpression(inputString);
 			if(result < Integer.MIN_VALUE || result > Integer.MAX_VALUE) {
 				System.out.println("Result is not between Integer.MIN_VALUE and Integer.MAX_VALUE");
 				System.exit(0);

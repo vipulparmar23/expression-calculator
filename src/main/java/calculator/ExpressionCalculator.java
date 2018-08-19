@@ -4,12 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 
 public class ExpressionCalculator {
 	
-	private static final Logger LOGGER = LogManager.getLogger(ExpressionCalculator.class);
+	private static Logger LOGGER = LogManager.getLogger(ExpressionCalculator.class);
+	
 	
 	/*
 	 * Using HashMap to store variable and their values set by 'let' command
@@ -159,14 +165,48 @@ public class ExpressionCalculator {
 		return checkResult;
 	}
 	
+	public void setLogLevel(String logLevel) {
+		
+		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+		Configuration config = ctx.getConfiguration();
+		LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME); 
+		
+		switch(logLevel.toLowerCase()) {
+		case "error":
+			loggerConfig.setLevel(Level.ERROR);			
+			break;
+		case "info":
+			loggerConfig.setLevel(Level.INFO);
+			break;
+		case "debug":
+			loggerConfig.setLevel(Level.DEBUG);
+			break;
+		default:
+			LOGGER.error("Invalid log level");
+			throw new RuntimeException();
+		}
+		ctx.updateLoggers();
+	}
+	
 	public static void main(String[] args) {
+		
 		LOGGER.info("Enter the expression in * add (1,2) * format");
+		
 		ExpressionCalculator cal = new ExpressionCalculator();
+		
 		LOGGER.debug("Calculator is running");
+		
 		Scanner scan = new Scanner(System.in);
 		System.out.println("\nInsert an expression: ");
 		String inputString = scan.nextLine();
+		
+		System.out.println("\nInsert log level: ");
+		String logLevel = scan.nextLine();
+		
+		
+		
 		LOGGER.info("Checking the expression for validity");
+		cal.setLogLevel(logLevel);
 		boolean isValid = cal.checkFormat(inputString);
 		if(!isValid) {
 			//System.out.println("Expression format is not proper. Check for missing or extra bracket.");

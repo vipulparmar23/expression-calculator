@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class ExpressionCalculator {
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+public class ExpressionCalculator {
+	
+	private static final Logger LOGGER = LogManager.getLogger(ExpressionCalculator.class);
+	
 	/*
 	 * Using HashMap to store variable and their values set by 'let' command
 	 */
@@ -14,6 +19,9 @@ public class ExpressionCalculator {
 
 	public double breakTheExpression(String expression) {
 		// Storing chunks of expression in ArrayList
+		
+		LOGGER.debug("Inside breakTheExpression() method");
+		
 		ArrayList<String> expressionList = new ArrayList<String>();
 
 		// let(a, let(b, 10, add(b, b)), let(b, 20, add(a, b)))
@@ -37,7 +45,7 @@ public class ExpressionCalculator {
 				//return Integer.parseInt(expression);
 				return Double.parseDouble(expression);
 			}
-
+			LOGGER.debug("Adding sub-expression to ArrayList: "+expression.substring(0, startIndex).trim());
 			expressionList.add(expression.substring(0, startIndex).trim()); // First operator
 
 			// Continuing loop from the index where first bracket was found
@@ -55,44 +63,65 @@ public class ExpressionCalculator {
 				if (expression.charAt(i) == ',' && brackets == 1 || brackets == 0) {
 					// Add the substring to ArrayList when a ',' is encountered inside a bracket OR
 					// outside brackets. But it shouldn't be inside of subexpression. Therefore,
-					// checking for brackets == 0 || 1
-
+					// checking for brackets == 0 || 1 
+					LOGGER.debug("Adding sub-expression to ArrayList: "+expression.substring(startIndex + 1, i).trim());
 					expressionList.add(expression.substring(startIndex + 1, i).trim());
 					startIndex = i;
 				}
 
 				if (brackets < 0)
-					return 0.001;
+					return 0;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return calculate(expressionList);
 	}
 
 	public double calculate(ArrayList<String> expressions) {
 
+		LOGGER.debug("Inside calculate() method");
 		double result = 0;
 		
 		String operator = expressions.get(0);
-
+		LOGGER.debug("Operator: "+operator);
+		
 		if (operator.equalsIgnoreCase("mult")) {
+			
+			LOGGER.debug("expression 1: "+expressions.get(1));
+			LOGGER.debug("expression 2: "+expressions.get(2));
+			
 			return breakTheExpression(expressions.get(1)) * breakTheExpression(expressions.get(2));
 		} else if (operator.equalsIgnoreCase("add")) {
+			
+			LOGGER.debug("expression 1: "+expressions.get(1));
+			LOGGER.debug("expression 2: "+expressions.get(2));
+			
 			return breakTheExpression(expressions.get(1)) + breakTheExpression(expressions.get(2));
 		} else if (operator.equalsIgnoreCase("sub")) {
+			
+			LOGGER.debug("expression 1: "+expressions.get(1));
+			LOGGER.debug("expression 2: "+expressions.get(2));
+			
 			return breakTheExpression(expressions.get(1)) - breakTheExpression(expressions.get(2));
 		} else if (operator.equalsIgnoreCase("div")) {
+			
+			LOGGER.debug("expression 1: "+expressions.get(1));
+			LOGGER.debug("expression 2: "+expressions.get(2));
+			
 			return breakTheExpression(expressions.get(1)) / breakTheExpression(expressions.get(2));
 		} else if (operator.equalsIgnoreCase("let")) { // if operator is let, the next two elements would be a variable and its value
+			
 			String letVariable = expressions.get(1);
 			Double value = variables.get(letVariable);
 			variables.put(letVariable, breakTheExpression(expressions.get(2)));
 
 			result = breakTheExpression(expressions.get(3));
-
+			LOGGER.debug("Putting let variables in HashMap == variable: "+letVariable+", value: "+value);
 			variables.put(letVariable, value);
 		}
+		LOGGER.debug("Calculation complete. Returning result");
 		return result;
 	}
 
@@ -100,12 +129,12 @@ public class ExpressionCalculator {
 
 		int brackets = 0;
 		boolean check = false;
-		
+		LOGGER.debug("Inside checkFormat() method");
 		if(expression.length() == 0) {
-			System.out.println("No input provided");
+			LOGGER.error("No expression provided");
 			return check;
 		}
-		
+		LOGGER.debug("Checking for bracket descripansy");
 		for(int i = 0; i < expression.length(); i++) {
 			if(expression.charAt(i) == '(') {
 				brackets++;
@@ -114,7 +143,7 @@ public class ExpressionCalculator {
 			}
 		}
 		if(brackets > 0 || brackets < 0) {
-			System.out.println("Expression format is not proper. Check for missing or extra bracket");
+			LOGGER.error("Expression format is not proper. Check for missing or extra bracket");
 			check = false;
 		}else {
 			check = true;
@@ -123,12 +152,13 @@ public class ExpressionCalculator {
 	}
 	
 	public static void main(String[] args) {
-		Scanner scan = new Scanner(System.in);
-		System.out.println("Insert an expression: ");
-		String inputString = scan.nextLine();
-
+		LOGGER.info("Enter the expression in * add (1,2) * format");
 		ExpressionCalculator cal = new ExpressionCalculator();
-
+		LOGGER.debug("Calculator is running");
+		Scanner scan = new Scanner(System.in);
+		System.out.println("\nInsert an expression: ");
+		String inputString = scan.nextLine();
+		LOGGER.info("Checking the expression for validity");
 		boolean isValid = cal.checkFormat(inputString);
 		if(!isValid) {
 			//System.out.println("Expression format is not proper. Check for missing or extra bracket.");

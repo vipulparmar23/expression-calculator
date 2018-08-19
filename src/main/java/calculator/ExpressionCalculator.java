@@ -98,6 +98,11 @@ public class ExpressionCalculator {
 		int brackets = 0;
 		boolean check = false;
 		
+		if(expression.length() == 0) {
+			System.out.println("No input provided");
+			return check;
+		}
+		
 		for(int i = 0; i < expression.length(); i++) {
 			if(expression.charAt(i) == '(') {
 				brackets++;
@@ -106,6 +111,7 @@ public class ExpressionCalculator {
 			}
 		}
 		if(brackets > 0 || brackets < 0) {
+			System.out.println("Expression format is not proper. Check for missing or extra bracket");
 			check = false;
 		}else {
 			check = true;
@@ -122,7 +128,8 @@ public class ExpressionCalculator {
 
 		boolean isValid = cal.checkFormat(inputString);
 		if(!isValid) {
-			System.out.println("Expression format is not proper. Check for missing or extra bracket.");
+			//System.out.println("Expression format is not proper. Check for missing or extra bracket.");
+			System.exit(0);
 		}else {
 			double result = cal.breakTheExpression(inputString);
 			System.out.println(result);
